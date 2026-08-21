@@ -1,0 +1,18 @@
+{
+  "name": "GLOCKTA - Global Knowledge & Talent Accelerator",
+  "short_name": "GLOCKTA",
+  "description": "Plataforma digital de empleabilidad e inclusión laboral. Talento que abre mundos.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#06111f",
+  "theme_color": "#06111f",
+  "lang": "es-AR",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

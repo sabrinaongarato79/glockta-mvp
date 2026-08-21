@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="GLOCKTA - Global Knowledge & Talent Accelerator" />
+  <title>GLOCKTA — From talent to opportunity</title>
+  <link rel="icon" href="/assets/glockta-icon.jpg" />
+  <link rel="apple-touch-icon" href="/assets/icon-192.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#060d18" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="GLOCKTA inicio"><img src="/assets/glockta-logo-horizontal.jpg" alt="GLOCKTA Global Knowledge and Talent Accelerator" /></a>
+    <nav aria-label="Navegación principal">
+      <a href="#passport">Mi perfil</a><a href="#jobs">Oportunidades</a><a href="#mentoria">Mentoría</a><a href="#biblioteca">Tienda</a><a href="#capacitaciones">Capacitaciones</a><a href="#curso-gratis">Curso gratis</a><a href="#business">Empresas</a>
+    </nav>
+    <div class="header-actions">
+      <button id="contrastBtn" class="icon-btn" type="button" aria-pressed="false">◐ Contraste</button>
+      <button id="fontBtn" class="icon-btn" type="button">A+</button>
+      <button id="cartBtn" class="icon-btn" type="button" aria-haspopup="dialog">🛒 Carrito <span id="cartCount" class="cart-count">0</span></button>
+      <button id="installBtn" class="icon-btn hidden" type="button">⬇ Instalar app</button>
+      <button id="loginBtn" class="btn btn-ghost" type="button">Ingresar con Google</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="inicio" class="hero shell">
+      <div class="hero-copy">
+        <span class="eyebrow">Inclusive Employability Accelerator</span>
+        <h1>Tu talento ya existe.<br><span>GLOCKTA lo acerca a la oportunidad.</span></h1>
+        <p>Construí tu Career Passport, descubrí oportunidades reales, medí tu compatibilidad y recibí un próximo paso concreto para avanzar.</p>
+        <div class="hero-actions"><a class="btn btn-primary" href="#passport">Crear mi Career Passport</a><a class="btn btn-secondary" href="#jobs">Explorar oportunidades</a></div>
+        <div class="trust-row"><span>✓ Matching explicable</span><span>✓ Accesibilidad</span><span>✓ Mentoría humana</span><span>✓ APIs externas</span></div>
+      </div>
+      <div class="hero-card" aria-label="Vista previa Glockta Match">
+        <div class="mini-head"><span class="dot"></span><b>Glockta Match</b><span class="live">LIVE</span></div>
+        <div class="score-ring"><strong>87%</strong><span>compatibilidad</span></div>
+        <h3>Marketing Assistant</h3><p class="muted">Buenos Aires · Híbrido</p>
+        <div class="chips"><span>✓ Inglés</span><span>✓ Canva</span><span>✓ Redes</span><span class="gap">△ Analytics</span></div>
+        <div class="next-step"><b>Próximo paso</b><p>Fortalecer Google Analytics puede mejorar tu match.</p></div>
+      </div>
+    </section>
+
+    <section id="passport" class="section shell">
+      <div class="section-title"><span class="eyebrow">01 · Career Passport</span><h2>Un perfil profesional que evoluciona con vos</h2><p>No es un CV estático. Es una ficha de empleabilidad que conecta habilidades, idiomas, experiencia, objetivo y preferencias de accesibilidad.</p></div>
+      <div class="grid-2">
+        <form id="profileForm" class="panel form-panel">
+          <label>Nombre<input id="name" placeholder="Tu nombre" /></label>
+          <label>Objetivo laboral<input id="goal" placeholder="Ej.: Atención al cliente, Marketing, Desarrollo web" /></label>
+          <label>Habilidades <small>separadas por coma</small><textarea id="skills" rows="3" placeholder="Ej.: ventas, comunicación, Canva"></textarea></label>
+          <label>Idiomas <small>separados por coma</small><input id="languages" placeholder="Ej.: español, inglés, portugués" /></label>
+          <button class="btn btn-primary" type="submit">Guardar mi perfil</button>
+        </form>
+        <div class="panel passport-card">
+          <div class="passport-top"><img src="/assets/glockta-icon.jpg" alt="" /><div><span>GLOCKTA CAREER PASSPORT</span><h3 id="passportName">Tu nombre</h3></div></div>
+          <div class="passport-score"><span>Completitud</span><strong id="profileCompletion">25%</strong></div>
+          <p><b>Objetivo:</b> <span id="passportGoal">Definilo para personalizar tus oportunidades</span></p>
+          <div id="passportSkills" class="chips"><span>Agregá tus habilidades</span></div>
+          <div class="passport-footer"><span>ID profesional dinámico</span><span>Privacidad controlada por el usuario</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="jobs" class="section section-dark">
+      <div class="shell">
+        <div class="section-title"><span class="eyebrow">02 · Opportunity Engine</span><h2>Buscá oportunidades y entendé tu distancia real</h2><p>GLOCKTA consulta un proveedor externo, normaliza las vacantes y calcula un match explicable con tu perfil.</p></div>
+        <form id="jobSearchForm" class="searchbar">
+          <input id="keywords" aria-label="Puesto o palabra clave" placeholder="Puesto o palabra clave" value="marketing" />
+          <input id="location" aria-label="Ubicación" placeholder="Ubicación" value="Buenos Aires" />
+          <select id="provider" aria-label="Proveedor"><option value="demo">Demo</option><option value="jooble">Jooble API</option><option value="adzuna">Adzuna API</option></select>
+          <button class="btn btn-primary" type="submit">Buscar</button>
+        </form>
+        <div id="jobStatus" class="status" role="status"></div>
+        <div id="jobsGrid" class="jobs-grid"></div>
+        <div id="externalSearchLinks" class="chips hidden"></div>
+      </div>
+    </section>
+
+    <section id="mentoria" class="section shell">
+      <div class="section-title"><span class="eyebrow">03 · Human Support</span><h2>La tecnología detecta la brecha. Una persona puede ayudarte a cerrarla.</h2></div>
+      <div class="grid-3">
+        <article class="feature-card"><span class="feature-icon">◎</span><h3>Orientación laboral</h3><p>CV, entrevista, reinserción laboral y estrategia de búsqueda.</p></article>
+        <article class="feature-card"><span class="feature-icon">◷</span><h3>Agenda Glockta</h3><p>Reservá una sesión según fecha, horario y motivo.</p><button id="openAgenda" class="text-btn">Reservar sesión →</button></article>
+        <article class="feature-card"><span class="feature-icon">✦</span><h3>Ruta de mejora</h3><p>Convertí cada skill gap en una acción concreta de aprendizaje.</p></article>
+      </div>
+      <form id="agendaForm" class="panel agenda-panel hidden">
+        <h3>Solicitar una mentoría</h3>
+        <div class="form-row"><label>Nombre<input id="agendaName" required /></label><label>Email<input id="agendaEmail" type="email" required /></label></div>
+        <div class="form-row"><label>Motivo<select id="agendaReason"><option>CV</option><option>Entrevista laboral</option><option>Búsqueda de empleo</option><option>Capacitación</option><option>Reconversión profesional</option></select></label><label>Fecha y hora<input id="agendaDate" type="datetime-local" required /></label></div>
+        <button class="btn btn-primary" type="submit">Solicitar turno</button><span id="agendaStatus" class="status"></span>
+        <div id="agendaConfirm" class="chips hidden"></div>
+      </form>
+    </section>
+
+    <section id="biblioteca" class="section soft-bg">
+      <div class="shell"><div class="section-title"><span class="eyebrow">04 · Glockta Store</span><h2>Contenido que convierte una brecha en progreso</h2><p>Ebooks, guías y microcursos con carrito real. Los pagos quedan listos para conectar Mercado Pago Checkout Pro.</p></div>
+      <div id="productsGrid" class="grid-3"><p class="status">Cargando catálogo…</p></div></div>
+    </section>
+
+    <section id="capacitaciones" class="section shell">
+      <div class="section-title"><span class="eyebrow">05 · Capacitaciones gratuitas</span><h2>Formación abierta, sin costo, para toda edad e idioma</h2><p>Talleres en vivo pensados para inclusión: sin requisitos previos, con inscripción simple.</p></div>
+      <div id="trainingsGrid" class="grid-3"><p class="status">Cargando capacitaciones…</p></div>
+    </section>
+
+    <section id="curso-gratis" class="section soft-bg">
+      <div class="shell">
+        <div class="section-title"><span class="eyebrow">06 · Curso gratuito</span><h2>Primeros pasos en tu búsqueda laboral</h2><p>4 lecciones cortas, sin costo. Iniciá sesión con Google para que tu avance y tu certificado queden guardados en tu cuenta (si no, se guarda solo en este dispositivo).</p></div>
+        <div class="course-progress"><div id="courseProgressBar" class="course-progress-bar"></div></div>
+        <p id="courseProgressLabel" class="status">0 de 4 lecciones completadas</p>
+        <div id="courseLessons"></div>
+        <div id="courseCertificateBox" class="panel hidden" style="margin-top:20px">
+          <h3>🎓 ¡Completaste el curso!</h3>
+          <p class="status">Descargá tu certificado de finalización en PDF (se abre para imprimir o guardar).</p>
+          <button id="downloadCertificateBtn" type="button" class="btn btn-primary">Descargar certificado</button>
+        </div>
+        <p class="status">¿Querés seguir profundizando? <a id="courseraLink" href="#" target="_blank" rel="noopener">Buscar más cursos relacionados en Coursera ↗</a></p>
+      </div>
+    </section>
+
+    <section id="business" class="section shell">
+      <div class="section-title"><span class="eyebrow">07 · GLOCKTA FOR BUSINESS</span><h2>Desarrollo web y consultoría de inclusión para empresas</h2><p>Paquetes orientativos. El presupuesto final se ajusta a alcance real en la reunión de propuesta.</p></div>
+      <div class="grid-3">
+        <article class="feature-card"><span class="feature-icon">◇</span><h3>Landing inclusiva</h3><p>Sitio de una página, accesible (WCAG), responsive, con formulario de contacto.</p><p><b>Desde $250.000 ARS</b></p></article>
+        <article class="feature-card"><span class="feature-icon">◆</span><h3>Sitio + panel a medida</h3><p>Web institucional o e-commerce simple con backend, base de datos y panel de administración.</p><p><b>Desde $650.000 ARS</b></p></article>
+        <article class="feature-card"><span class="feature-icon">✦</span><h3>Consultoría de inclusión digital</h3><p>Auditoría de accesibilidad, capacitación al equipo y plan de empleabilidad inclusiva.</p><p><b>Presupuesto a medida</b></p></article>
+      </div>
+      <div class="business-panel">
+        <div><span class="eyebrow">SOLICITAR PROPUESTA</span><h2>Contanos qué necesita tu empresa</h2><p>Programas de empleabilidad, capacitación, accesibilidad digital, consultoría y desarrollo web.</p><div class="chips"><span>Talent</span><span>Training</span><span>Accessibility</span><span>Web</span></div></div>
+        <form id="businessForm" class="business-form">
+          <input id="companyName" placeholder="Empresa" required /><input id="contactName" placeholder="Contacto" required /><input id="businessEmail" type="email" placeholder="Email" required />
+          <select id="businessService"><option>Landing inclusiva</option><option>Sitio + panel a medida</option><option>Consultoría de inclusión digital</option><option>Programa de empleabilidad</option><option>Capacitación</option><option>Accesibilidad digital</option></select>
+          <textarea id="businessMessage" rows="3" placeholder="¿Qué necesita la empresa?"></textarea><button class="btn btn-primary" type="submit">Solicitar propuesta</button><span id="businessStatus" class="status"></span>
+          <div id="businessConfirm" class="chips hidden"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer><img src="/assets/glockta-logo-horizontal.jpg" alt="GLOCKTA" /><p>From talent to opportunity · Diagnose. Learn. Match. Grow.</p><div id="footerContact" class="chips"></div></footer>
+
+  <dialog id="cartDialog"><button class="dialog-close" aria-label="Cerrar">×</button><h2>Tu carrito</h2>
+    <div id="cartItems"></div>
+    <p class="passport-score"><span>Total</span><strong id="cartTotal">$0</strong></p>
+    <form id="checkoutForm" class="form-panel">
+      <label>Nombre<input id="checkoutName" required /></label>
+      <label>Email<input id="checkoutEmail" type="email" required /></label>
+      <button class="btn btn-primary wide" type="submit">Finalizar compra</button>
+      <span id="checkoutStatus" class="status"></span>
+    </form>
+  </dialog>
+
+  <dialog id="loginDialog"><button class="dialog-close" aria-label="Cerrar">×</button><h2 id="authTitle">Ingresar a GLOCKTA</h2><p id="authDescription">Google es la autenticación principal del MVP, con Row Level Security en Supabase.</p><div id="userCard" class="hidden" aria-live="polite"></div><button id="googleAuthBtn" class="btn btn-primary wide">Continuar con Google</button><button id="logoutBtn" class="btn btn-secondary wide hidden">Cerrar sesión</button><p id="authStatus" class="status"></p></dialog>
+
+  <a id="waFloat" class="wa-float hidden" href="#" target="_blank" rel="noopener" aria-label="Chatear por WhatsApp">💬</a>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
