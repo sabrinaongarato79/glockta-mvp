@@ -62,10 +62,18 @@ Con eso se activa: el botón flotante de WhatsApp en todo el sitio, la confirmac
 
 Es un botón "click to chat" (`wa.me`), sin costo y sin necesidad de aprobar ninguna cuenta — funciona apenas completás el número. El siguiente nivel (mensajes automáticos, confirmaciones de compra por WhatsApp) requiere WhatsApp Business API vía Meta o Twilio, que tiene costo por mensaje y un proceso de verificación de varios días; se puede sumar más adelante sin tocar el resto de la arquitectura.
 
-### 4. Calendario de mentorías
+### 4. Asistente de IA (Claude)
+Completá `ANTHROPIC_API_KEY` en `.env` con una clave de [console.anthropic.com](https://console.anthropic.com). Con eso se activan dos funciones opcionales:
+
+- **Completar el Career Passport con IA**: la persona cuenta su experiencia en un texto libre ("le cuento a un amigo qué hice hasta hoy") y la IA completa objetivo, habilidades e idiomas del formulario.
+- **Consejo personalizado por oportunidad**: en cada resultado de búsqueda aparece un botón "Ver consejo personalizado" que redacta, en base al mismo cálculo de coincidencias/brechas del Glockta Match (no inventa un puntaje nuevo), un consejo breve en tono de mentor.
+
+Sin esta clave, ambos botones quedan ocultos automáticamente y el resto del sitio sigue funcionando igual — es 100% opcional, pensado para reforzar (no reemplazar) el matching explicable que ya tiene la plataforma.
+
+### 6. Calendario de mentorías
 Ya funciona sin configuración adicional: al reservar un turno, además de guardarse en la base de datos, aparecen dos botones — **"Agregar a Google Calendar"** (abre Google Calendar con el evento precargado) y **"Descargar .ics"** (archivo de invitación de calendario compatible con Google Calendar, Outlook y Apple Calendar). No requiere cuentas de Google Cloud ni OAuth.
 
-### 5. Curso gratuito y certificado
+### 7. Curso gratuito y certificado
 El curso ya persiste el avance en `localStorage` como invitado, y si el usuario inicia sesión con Google, el progreso (y el avance que ya tenía como invitado) se sincroniza a la tabla `course_progress` en Supabase — así el progreso no se pierde si cambia de dispositivo. Al completar las 4 lecciones se emite un certificado descargable (PDF vía diálogo de impresión del navegador) y, si el usuario está logueado, queda un registro verificable en la tabla `certificates`.
 
 ---

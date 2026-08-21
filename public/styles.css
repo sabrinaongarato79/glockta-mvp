@@ -133,6 +133,31 @@ img{max-width:100%;display:block}
 .btn-ghost:hover{background:#eef4f7;transform:translateY(-1px)}
 .wide{width:100%}
 
+/* ---------------- AI assist ---------------- */
+.ai-assist-box{
+  background:linear-gradient(135deg,rgba(45,212,238,.1),rgba(255,181,69,.06));
+  border:1px solid rgba(45,212,238,.28);border-radius:var(--r-sm);
+  padding:16px;margin-bottom:18px;display:flex;flex-direction:column;gap:8px;
+}
+.ai-assist-box label{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.85rem}
+.ai-assist-box textarea{width:100%}
+.ai-badge{
+  background:linear-gradient(135deg,var(--cyan),#ffb545);color:#06131c;
+  font-size:.68rem;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;
+}
+.btn-ai{
+  align-self:flex-start;background:linear-gradient(135deg,var(--cyan),#ffb545);
+  color:#06131c;border:0;border-radius:var(--r-sm);padding:10px 18px;font-weight:700;cursor:pointer;
+  transition:transform .18s var(--ease),filter .18s var(--ease);
+}
+.btn-ai:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn-ai:disabled{opacity:.6;cursor:wait;transform:none}
+.ai-advice-btn{color:#0e9dc4;font-weight:700;margin-top:4px}
+.ai-advice-box{
+  margin-top:8px;padding:10px 12px;border-radius:10px;font-size:.85rem;line-height:1.5;
+  background:rgba(45,212,238,.08);border:1px solid rgba(45,212,238,.22);color:var(--text);
+}
+
 /* ---------------- Hero ---------------- */
 .hero{
   min-height:82vh;display:grid;grid-template-columns:1.15fr .85fr;gap:64px;

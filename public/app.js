@@ -97,6 +97,26 @@ $('profileForm').addEventListener('submit',async e=>{
   }catch(err){toast(`No se pudo sincronizar el perfil: ${err.message}`);}
 });
 
+// ---- Asistente de Career Passport con IA ----
+if($('aiFillBtn')) $('aiFillBtn').addEventListener('click', async ()=>{
+  const text = $('aiFreeText').value.trim();
+  const statusEl = $('aiAssistStatus');
+  if(!text){statusEl.textContent='Contame un poco tu experiencia primero.'; return;}
+  if(!config.aiEnabled){statusEl.textContent='El asistente de IA no está configurado en este entorno (falta ANTHROPIC_API_KEY). Podés completar el formulario a mano.'; return;}
+  const btn = $('aiFillBtn');
+  btn.disabled = true; btn.textContent='Pensando…'; statusEl.textContent='';
+  try{
+    const res = await fetch('/api/ai/parse-profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const data = await res.json();
+    if(!res.ok){statusEl.textContent = data.message || 'No se pudo procesar el relato. Completá el formulario a mano.'; return;}
+    if(data.profile.goal) $('goal').value = data.profile.goal;
+    if(data.profile.skills?.length) $('skills').value = data.profile.skills.join(', ');
+    if(data.profile.languages?.length) $('languages').value = data.profile.languages.join(', ');
+    statusEl.textContent = '✓ Completado con IA. Revisá y ajustá antes de guardar.';
+  }catch(err){statusEl.textContent = 'No se pudo conectar con el asistente de IA. Completá el formulario a mano.';}
+  finally{btn.disabled=false; btn.textContent='Completar con IA';}
+});
+
 $('jobSearchForm').addEventListener('submit',async e=>{e.preventDefault();await searchJobs();});
 async function searchJobs(){
   $('jobStatus').textContent='Consultando oportunidades…'; $('jobsGrid').innerHTML='';
@@ -138,8 +158,21 @@ async function saveJob(job,match){
 function renderJob(job,match){
   const card=document.createElement('article'); card.className='job-card';
   const score=match.score===null?'—':`${match.score}%`;
-  card.innerHTML=`<span class="eyebrow">${escapeHtml(job.source||'Proveedor externo')}</span><h3>${escapeHtml(job.title)}</h3><div class="job-meta">${escapeHtml(job.company||'')} · ${escapeHtml(job.location||'')}</div><p>${escapeHtml((job.description||'').slice(0,260))}</p><div class="match-box"><span class="match-score ${match.score!==null&&match.score<60?'low':''}">${score} Match</span><p class="status">${escapeHtml(match.explanation)}</p><div class="chips">${(match.matched||[]).slice(0,5).map(x=>`<span>✓ ${escapeHtml(x)}</span>`).join('')}${(match.gaps||[]).slice(0,3).map(x=>`<span class="gap">△ ${escapeHtml(x)}</span>`).join('')}</div></div><div class="job-actions"><button class="btn btn-primary save-job">Guardar</button>${job.url&&job.url!=='#'?`<a class="btn btn-secondary" target="_blank" rel="noopener" href="${escapeHtml(job.url)}">Ver fuente</a>`:''}<a class="btn btn-secondary" href="#mentoria">Hablar con mentor</a></div>`;
+  const aiBtn = config.aiEnabled ? `<button class="text-btn ai-advice-btn">✦ Ver consejo personalizado</button>` : '';
+  card.innerHTML=`<span class="eyebrow">${escapeHtml(job.source||'Proveedor externo')}</span><h3>${escapeHtml(job.title)}</h3><div class="job-meta">${escapeHtml(job.company||'')} · ${escapeHtml(job.location||'')}</div><p>${escapeHtml((job.description||'').slice(0,260))}</p><div class="match-box"><span class="match-score ${match.score!==null&&match.score<60?'low':''}">${score} Match</span><p class="status">${escapeHtml(match.explanation)}</p><div class="chips">${(match.matched||[]).slice(0,5).map(x=>`<span>✓ ${escapeHtml(x)}</span>`).join('')}${(match.gaps||[]).slice(0,3).map(x=>`<span class="gap">△ ${escapeHtml(x)}</span>`).join('')}</div>${aiBtn}<div class="ai-advice-box hidden"></div></div><div class="job-actions"><button class="btn btn-primary save-job">Guardar</button>${job.url&&job.url!=='#'?`<a class="btn btn-secondary" target="_blank" rel="noopener" href="${escapeHtml(job.url)}">Ver fuente</a>`:''}<a class="btn btn-secondary" href="#mentoria">Hablar con mentor</a></div>`;
   card.querySelector('.save-job').addEventListener('click',()=>saveJob(job,match));
+  const adviceBtn = card.querySelector('.ai-advice-btn');
+  if(adviceBtn) adviceBtn.addEventListener('click', async ()=>{
+    const box = card.querySelector('.ai-advice-box');
+    box.classList.remove('hidden');
+    adviceBtn.disabled = true; box.textContent = 'Pensando un consejo para vos…';
+    try{
+      const res = await fetch('/api/ai/match-explanation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jobTitle:job.title,score:match.score,matched:match.matched||[],gaps:match.gaps||[]})});
+      const data = await res.json();
+      box.textContent = res.ok ? data.explanation : (data.message || 'No se pudo generar el consejo en este momento.');
+    }catch(err){box.textContent='No se pudo conectar con el asistente de IA.';}
+    finally{adviceBtn.disabled=false;}
+  });
   $('jobsGrid').appendChild(card);
 }
 

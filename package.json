@@ -12,6 +12,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@supabase/supabase-js": "^2.57.4",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",

@@ -8,6 +8,7 @@ const { searchJobs } = require('./services/jobService');
 const { calculateMatch } = require('./services/matchingService');
 const { getSupabaseAdmin } = require('./supabase');
 const paymentService = require('./services/paymentService');
+const aiService = require('./services/aiService');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,8 +30,43 @@ app.get('/api/config', (req, res) => {
     defaultJobProvider: process.env.JOB_PROVIDER || 'demo',
     whatsappNumber: process.env.WHATSAPP_NUMBER || '',
     contactEmail: process.env.CONTACT_EMAIL || '',
-    mercadoPagoEnabled: paymentService.isMpConfigured()
+    mercadoPagoEnabled: paymentService.isMpConfigured(),
+    aiEnabled: aiService.isAiConfigured()
   });
+});
+
+// ---- Asistente de IA: completar el Career Passport a partir de un relato libre ----
+app.post('/api/ai/parse-profile', async (req, res) => {
+  const freeText = String(req.body.text || '').trim();
+  if (!freeText) return res.status(400).json({ error: 'TEXT_REQUIRED' });
+  if (!aiService.isAiConfigured()) {
+    return res.status(503).json({ error: 'AI_NOT_CONFIGURED', message: 'Falta configurar ANTHROPIC_API_KEY en el .env para usar el asistente de IA.' });
+  }
+  try {
+    const profile = await aiService.parseProfileFromText(freeText);
+    res.json({ profile });
+  } catch (err) {
+    res.status(502).json({ error: 'AI_ERROR', message: err.message });
+  }
+});
+
+// ---- Asistente de IA: explicación del match con tono de mentor ----
+app.post('/api/ai/match-explanation', async (req, res) => {
+  const { jobTitle, score, matched, gaps } = req.body || {};
+  if (!aiService.isAiConfigured()) {
+    return res.status(503).json({ error: 'AI_NOT_CONFIGURED', message: 'Falta configurar ANTHROPIC_API_KEY en el .env para usar el asistente de IA.' });
+  }
+  try {
+    const explanation = await aiService.explainMatch({
+      jobTitle: String(jobTitle || '').slice(0, 160),
+      score: Number(score) || 0,
+      matched: Array.isArray(matched) ? matched.slice(0, 10) : [],
+      gaps: Array.isArray(gaps) ? gaps.slice(0, 10) : []
+    });
+    res.json({ explanation });
+  } catch (err) {
+    res.status(502).json({ error: 'AI_ERROR', message: err.message });
+  }
 });
 
 app.post('/api/jobs/search', async (req, res) => {

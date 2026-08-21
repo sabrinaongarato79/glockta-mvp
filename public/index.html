@@ -53,6 +53,12 @@
       <div class="section-title"><span class="eyebrow">01 · Career Passport</span><h2>Un perfil profesional que evoluciona con vos</h2><p>No es un CV estático. Es una ficha de empleabilidad que conecta habilidades, idiomas, experiencia, objetivo y preferencias de accesibilidad.</p></div>
       <div class="grid-2">
         <form id="profileForm" class="panel form-panel">
+          <div id="aiAssistBox" class="ai-assist-box">
+            <label for="aiFreeText"><span class="ai-badge">✦ IA</span> Contame tu experiencia con tus palabras</label>
+            <textarea id="aiFreeText" rows="3" placeholder="Ej.: Trabajé años atendiendo clientes en un local, hablo un poco de inglés y me manejo bien con Excel y redes sociales..."></textarea>
+            <button type="button" id="aiFillBtn" class="btn btn-ai">Completar con IA</button>
+            <p id="aiAssistStatus" class="status"></p>
+          </div>
           <label>Nombre<input id="name" placeholder="Tu nombre" /></label>
           <label>Objetivo laboral<input id="goal" placeholder="Ej.: Atención al cliente, Marketing, Desarrollo web" /></label>
           <label>Habilidades <small>separadas por coma</small><textarea id="skills" rows="3" placeholder="Ej.: ventas, comunicación, Canva"></textarea></label>
