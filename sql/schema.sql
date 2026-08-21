@@ -8,6 +8,9 @@ create table if not exists public.profiles (
   skills text[] default '{}',
   languages text[] default '{}',
   accessibility_preferences jsonb default '{}'::jsonb,
+  -- Rol del usuario dentro de GLOCKTA. 'candidate' es el rol por defecto (persona que busca empleo).
+  -- 'business' y 'admin' habilitan el panel de gestión (ver public/admin.html).
+  role text not null default 'candidate' check (role in ('candidate','business','admin')),
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

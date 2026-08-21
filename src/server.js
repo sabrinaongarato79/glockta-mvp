@@ -212,6 +212,47 @@ app.post('/api/contact/business', async (req, res) => {
   res.status(201).json({ lead: data });
 });
 
+// ---- Panel de administración (rol "business/admin") ----
+// Acceso simple por token compartido (ADMIN_TOKEN en .env), pensado para que la mesa de tesis
+// pueda ver un segundo rol de usuario (gestión) distinto del candidato que usa el sitio público.
+// DEMO_ADMIN_DATA sostiene el panel funcionando aunque todavía no haya Supabase conectado.
+const DEMO_ADMIN_DATA = {
+  leads: [{ id: 'demo-lead-1', company_name: 'Acme SRL', contact_name: 'Juan Pérez', email: 'juan@acme.com', service: 'Landing inclusiva', status: 'new', created_at: new Date().toISOString() }],
+  appointments: [{ id: 'demo-appt-1', user_name: 'Sabrina Ongarato', user_email: 'sabrina@example.com', reason: 'CV', scheduled_at: new Date().toISOString(), status: 'requested' }],
+  orders: [{ id: 'demo-order-1', customer_name: 'Sabrina Ongarato', customer_email: 'sabrina@example.com', total: 4900, currency: 'ARS', status: 'pending', created_at: new Date().toISOString() }],
+  trainingSignups: [{ id: 'demo-signup-1', training_name: 'Cómo armar tu CV sin experiencia', full_name: 'Sabrina Ongarato', email: 'sabrina@example.com', created_at: new Date().toISOString() }]
+};
+
+function requireAdminToken(req, res, next) {
+  const configured = process.env.ADMIN_TOKEN;
+  if (!configured) return next(); // Sin ADMIN_TOKEN configurado, el panel queda abierto en modo demo local.
+  const provided = req.get('x-admin-token') || req.query.token;
+  if (provided !== configured) return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Token de administrador inválido o faltante.' });
+  next();
+}
+
+app.get('/api/admin/overview', requireAdminToken, async (req, res) => {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return res.json({ demo: true, ...DEMO_ADMIN_DATA });
+
+  const [leads, appointments, orders, trainingSignups] = await Promise.all([
+    supabase.from('business_leads').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.from('appointments').select('*').order('created_at', { ascending: false }).limit(100),
+    supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false }).limit(100),
+    supabase.from('training_signups').select('*').order('created_at', { ascending: false }).limit(100)
+  ]);
+  const firstError = [leads, appointments, orders, trainingSignups].find(r => r.error);
+  if (firstError) return res.status(500).json({ error: firstError.error.message });
+
+  res.json({
+    demo: false,
+    leads: leads.data,
+    appointments: appointments.data,
+    orders: orders.data,
+    trainingSignups: trainingSignups.data
+  });
+});
+
 app.get('/*splat', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
 app.listen(port, () => console.log(`GLOCKTA running on http://localhost:${port}`));
