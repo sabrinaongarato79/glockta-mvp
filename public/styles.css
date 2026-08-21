@@ -343,6 +343,11 @@ footer{
   display:flex;align-items:center;justify-content:space-between;color:var(--muted-2);flex-wrap:wrap;gap:16px;
 }
 footer img{width:160px;opacity:.9}
+.footer-legal{width:100%;order:99;font-size:.8rem}
+.footer-legal a{color:var(--muted-2);text-decoration:none}
+.footer-legal a:hover{color:var(--text);text-decoration:underline}
+.checkout-legal{font-size:.75rem;color:var(--muted-2);line-height:1.5}
+.checkout-legal a{color:var(--cyan)}
 
 dialog{
   background:var(--panel-2);color:var(--text);border:1px solid var(--line);

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="GLOCKTA - Política de privacidad y términos de uso" />
+  <title>GLOCKTA — Privacidad y Términos de uso</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/glockta-mark.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+  <meta name="theme-color" content="#060d18" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .legal-shell{max-width:820px;margin:0 auto;padding:64px 24px 96px}
+    .legal-shell h1{font-family:'Manrope',sans-serif;font-weight:800;font-size:2.1rem;margin-bottom:6px}
+    .legal-shell .updated{color:var(--muted);font-size:.85rem;margin-bottom:40px}
+    .legal-shell h2{font-family:'Manrope',sans-serif;font-weight:700;font-size:1.25rem;margin:36px 0 12px;color:var(--cyan)}
+    .legal-shell p,.legal-shell li{color:var(--text);line-height:1.7;font-size:.95rem}
+    .legal-shell ul{margin:8px 0 8px 22px}
+    .legal-shell li{margin-bottom:6px}
+    .legal-shell .callout{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px;margin:20px 0}
+    .legal-shell a{color:var(--cyan)}
+    .back-link{display:inline-block;margin-bottom:24px;color:var(--muted);text-decoration:none;font-size:.85rem}
+    .back-link:hover{color:var(--text)}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/#inicio" aria-label="GLOCKTA inicio"><img src="/assets/glockta-logo-horizontal.png" alt="GLOCKTA Global Knowledge and Talent Accelerator" /></a>
+    <nav aria-label="Navegación principal">
+      <a href="/#passport">Mi perfil</a><a href="/#jobs">Oportunidades</a><a href="/#mentoria">Mentoría</a><a href="/#biblioteca">Tienda</a><a href="/#capacitaciones">Capacitaciones</a><a href="/#curso-gratis">Curso gratis</a><a href="/#business">Empresas</a>
+    </nav>
+  </header>
+
+  <main class="legal-shell">
+    <a class="back-link" href="/">← Volver a GLOCKTA</a>
+    <h1>Privacidad y Términos de uso</h1>
+    <p class="updated">Última actualización: agosto de 2026</p>
+
+    <div class="callout">
+      <p>GLOCKTA es un proyecto de tesis de la carrera Analista de Sistemas (Escuela Da Vinci) en etapa de plataforma piloto (MVP). Este documento explica, en lenguaje simple, qué datos personales recolectamos, para qué los usamos y qué derechos tenés sobre ellos, conforme a la <b>Ley 25.326 de Protección de Datos Personales</b> de la República Argentina.</p>
+    </div>
+
+    <h2>1. Qué datos recolectamos</h2>
+    <p>Según qué partes de GLOCKTA uses, podemos guardar:</p>
+    <ul>
+      <li><b>Datos de tu Career Passport:</b> nombre, objetivo laboral, habilidades e idiomas que cargues vos mismo/a (a mano o con ayuda del asistente de IA).</li>
+      <li><b>Datos de cuenta:</b> nombre y email, si iniciás sesión con Google.</li>
+      <li><b>Oportunidades guardadas:</b> las vacantes que marcás como guardadas y tu puntaje de compatibilidad con cada una.</li>
+      <li><b>Turnos de mentoría:</b> nombre, email, motivo de la consulta y fecha/hora solicitada.</li>
+      <li><b>Compras en la tienda:</b> nombre, email y detalle del pedido. Los datos de la tarjeta o medio de pago los procesa exclusivamente Mercado Pago — GLOCKTA nunca los recibe ni los almacena.</li>
+      <li><b>Progreso del curso gratuito:</b> lecciones completadas y, si corresponde, el certificado emitido a tu nombre.</li>
+      <li><b>Consultas de empresas:</b> datos de contacto que una empresa deja al pedir información sobre nuestros servicios.</li>
+    </ul>
+
+    <h2>2. Para qué los usamos</h2>
+    <ul>
+      <li>Calcular tu compatibilidad con oportunidades laborales (Glockta Match) y mostrarte próximos pasos concretos.</li>
+      <li>Coordinar sesiones de mentoría y enviarte la confirmación por WhatsApp o email.</li>
+      <li>Procesar compras en la tienda y emitir la confirmación correspondiente.</li>
+      <li>Emitir y verificar certificados del curso gratuito.</li>
+      <li>Si activás el asistente de IA: transformar el relato libre que escribís en un perfil estructurado (objetivo, habilidades, idiomas), y redactar un consejo personalizado a partir de tu compatibilidad con una vacante. Ese texto se envía a la API de Anthropic (Claude) únicamente para generar la respuesta; no se usa para entrenar modelos de terceros ni se comparte con otras personas usuarias.</li>
+    </ul>
+    <p>No vendemos datos personales a terceros ni los usamos con fines publicitarios.</p>
+
+    <h2>3. Dónde se guardan</h2>
+    <p>Los datos de cuenta, perfil, turnos, pedidos y certificados se almacenan en Supabase (base de datos PostgreSQL con controles de acceso por fila, "Row Level Security"), de forma que cada persona usuaria sólo puede ver y modificar su propia información. Si todavía no iniciaste sesión, tu Career Passport se guarda únicamente en tu propio dispositivo (localStorage del navegador) hasta que decidas sincronizarlo.</p>
+
+    <h2>4. Tus derechos</h2>
+    <p>Como titular de tus datos, en cualquier momento podés pedirnos:</p>
+    <ul>
+      <li><b>Acceso:</b> saber qué datos tuyos tenemos guardados.</li>
+      <li><b>Rectificación:</b> corregir un dato incorrecto o desactualizado.</li>
+      <li><b>Supresión:</b> que eliminemos tu cuenta y los datos asociados.</li>
+      <li><b>Revocación del consentimiento:</b> dejar de usar una función (por ejemplo, el asistente de IA) sin perder acceso al resto de la plataforma.</li>
+    </ul>
+    <p>Para ejercer cualquiera de estos derechos, escribinos a <a id="privacyContactEmail" href="mailto:info.glockta@gmail.com">info.glockta@gmail.com</a> o por WhatsApp desde el botón flotante del sitio. También podés hacer un reclamo ante la <a href="https://www.argentina.gob.ar/aaip" target="_blank" rel="noopener">Agencia de Acceso a la Información Pública</a>, autoridad de control de la Ley 25.326.</p>
+
+    <h2>5. Cookies y almacenamiento local</h2>
+    <p>GLOCKTA usa el almacenamiento local del navegador (localStorage) para recordar tu Career Passport mientras no iniciás sesión, tus preferencias de accesibilidad (contraste y tamaño de letra) y el progreso del curso gratuito como invitado/a. No usamos cookies de rastreo ni de publicidad de terceros.</p>
+
+    <h2>6. Pagos</h2>
+    <p>Los pagos en la tienda se procesan a través de Mercado Pago Checkout Pro. GLOCKTA nunca ve ni guarda el número de tarjeta: sólo recibe la confirmación de que el pago fue aprobado, rechazado o quedó pendiente.</p>
+
+    <h2>7. Menores de edad</h2>
+    <p>GLOCKTA está pensado para personas en edad de trabajar. Si sos menor de 18 años, te pedimos que uses la plataforma junto con un adulto responsable.</p>
+
+    <h2>8. Contacto</h2>
+    <p>Ante cualquier duda sobre esta política, escribinos a <a href="mailto:info.glockta@gmail.com">info.glockta@gmail.com</a>.</p>
+  </main>
+
+  <footer><img src="/assets/glockta-logo-horizontal.png" alt="GLOCKTA" /><p>From talent to opportunity · Diagnose. Learn. Match. Grow.</p></footer>
+
+  <script>
+    fetch('/api/config').then(r=>r.json()).then(cfg=>{
+      if(cfg.contactEmail){
+        document.querySelectorAll('a[href^="mailto:info.glockta@gmail.com"]').forEach(a=>{
+          a.href = `mailto:${cfg.contactEmail}`;
+          a.textContent = cfg.contactEmail;
+        });
+      }
+    }).catch(()=>{});
+  </script>
+</body>
+</html>

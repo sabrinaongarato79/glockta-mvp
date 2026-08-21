@@ -142,6 +142,23 @@ Esto resuelve el requisito sin duplicar código: la APK y el Website comparten e
 - El estado de una orden sólo lo cambia el webhook de Mercado Pago (con la confirmación real del pago), nunca el navegador del comprador.
 - El matching no decide contrataciones; sólo explica coincidencias y brechas.
 
+## Privacidad
+La página `/privacidad.html` explica en lenguaje simple qué datos se recolectan, para qué se usan, dónde se guardan y cómo ejercer los derechos de acceso/rectificación/supresión, conforme a la Ley 25.326 de Protección de Datos Personales. Está enlazada desde el pie de página del sitio y desde el formulario de checkout.
+
+## Tests automatizados
+El proyecto incluye una suite de pruebas con el test runner nativo de Node (no requiere instalar nada extra):
+
+```
+npm test
+```
+
+Cubre tres niveles:
+- **Unitarias de lógica de negocio** (`tests/matchingService.test.js`): verifica que el cálculo de compatibilidad sea correcto, no distinga mayúsculas/minúsculas, use `job.skills` cuando existen y nunca "decida" automáticamente — sólo informe coincidencias y brechas.
+- **Unitarias de integraciones externas** (`tests/aiService.test.js`, `tests/paymentService.test.js`): confirman que, sin credenciales configuradas, el sistema entra en modo demo de forma segura (devuelve `null`/`false`) en vez de romperse.
+- **De integración de API** (`tests/api.test.js`): levantan el servidor Express real en un puerto de prueba y validan los endpoints más sensibles — que `/api/config` nunca filtre claves secretas, que los endpoints de IA respondan `503` claro sin `ANTHROPIC_API_KEY`, que el checkout rechace pedidos sin email, y que `/api/admin/overview` exija el token correcto cuando `ADMIN_TOKEN` está configurado.
+
+Para la defensa: esta suite no busca cobertura exhaustiva (fuera del alcance de un MVP de tesis), sino demostrar una práctica real de calidad sobre las partes más riesgosas del sistema — dinero, datos sensibles y decisiones automáticas.
+
 ## Próximos pasos sugeridos (post-tesis, para escalar)
 1. Facturación automática (Monotributo/Responsable Inscripto vía AFIP, o un facturador como Alegra/Contabilium) al confirmarse cada pago.
 2. WhatsApp Business API real (Meta Cloud API o Twilio) para confirmaciones automáticas de compra/turno, cuando el volumen lo justifique.

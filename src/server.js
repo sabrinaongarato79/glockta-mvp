@@ -291,4 +291,11 @@ app.get('/api/admin/overview', requireAdminToken, async (req, res) => {
 
 app.get('/*splat', (req, res) => res.sendFile(path.join(publicDir, 'index.html')));
 
-app.listen(port, () => console.log(`GLOCKTA running on http://localhost:${port}`));
+// Sólo levanta el servidor HTTP cuando se ejecuta directamente (node src/server.js).
+// Cuando se importa desde los tests (require('./server')) exportamos la app de Express
+// sin abrir un puerto, para poder probar los endpoints sin levantar el proceso completo.
+if (require.main === module) {
+  app.listen(port, () => console.log(`GLOCKTA running on http://localhost:${port}`));
+}
+
+module.exports = app;
