@@ -101,6 +101,8 @@ img{max-width:100%;display:block}
   padding:9px 9px;border-radius:999px;transition:color .18s var(--ease),background-color .18s var(--ease);
 }
 .topbar nav a:hover{color:var(--text);background:var(--surface)}
+.topbar nav a.nav-core{color:var(--text);font-weight:800}
+.nav-sep{width:1px;height:16px;background:var(--line);margin:0 8px;align-self:center;display:inline-block}
 .header-actions{display:flex;gap:8px;align-items:center;flex:none}
 .header-actions .btn-ghost,.header-actions .icon-btn{white-space:nowrap}
 
@@ -157,6 +159,13 @@ img{max-width:100%;display:block}
   margin-top:8px;padding:10px 12px;border-radius:10px;font-size:.85rem;line-height:1.5;
   background:rgba(45,212,238,.08);border:1px solid rgba(45,212,238,.22);color:var(--text);
 }
+.learning-path-btn{color:var(--amber);font-weight:700;margin-top:4px;display:block}
+.learning-path-box{
+  margin-top:8px;padding:10px 12px;border-radius:10px;font-size:.85rem;line-height:1.6;
+  background:var(--amber-soft);border:1px solid rgba(184,134,11,.3);color:var(--text);
+}
+.learning-path-box p{margin:4px 0}
+.learning-path-box a{color:var(--amber)}
 
 /* ---------------- Hero ---------------- */
 .hero{
@@ -168,6 +177,18 @@ img{max-width:100%;display:block}
   text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;
 }
 .eyebrow::before{content:"";width:22px;height:2px;background:var(--cyan);border-radius:2px;display:inline-block}
+.eyebrow.complement{color:var(--muted-2)}
+.eyebrow.complement::before{background:var(--muted-2);width:14px}
+
+.section-divider{
+  display:flex;align-items:center;gap:18px;padding:34px 0 6px;
+}
+.divider-line{flex:1;height:1px;background:var(--line)}
+.divider-label{
+  color:var(--muted-2);font-size:.8rem;font-weight:700;letter-spacing:.04em;
+  white-space:nowrap;text-align:center;
+}
+@media(max-width:640px){.divider-label{white-space:normal;text-align:center}}
 .hero h1{
   font-size:clamp(2.6rem,5.6vw,5.2rem);line-height:1.02;margin:18px 0 22px;
   letter-spacing:-.04em;
@@ -180,6 +201,33 @@ img{max-width:100%;display:block}
 .hero-actions{display:flex;gap:12px;margin:30px 0;flex-wrap:wrap}
 .trust-row{display:flex;gap:20px;flex-wrap:wrap;color:var(--muted-2);font-size:.86rem;font-weight:600}
 .trust-row span{display:inline-flex;align-items:center;gap:6px}
+
+/* Hero liviano: un solo mensaje y un CTA, sin preview ni grilla de 2 columnas */
+.hero.hero-light{grid-template-columns:1fr;min-height:auto;padding:72px 0 48px;text-align:center}
+.hero-copy.hero-copy-center{max-width:760px;margin:0 auto}
+.hero-copy.hero-copy-center>p{margin:0 auto}
+.hero-actions.hero-actions-center{justify-content:center}
+.btn-lg{padding:16px 34px;font-size:1.05rem}
+.hero-microcopy{color:var(--muted-2);font-size:.9rem;margin-top:4px}
+.hero-microcopy a{color:var(--cyan);font-weight:700}
+
+/* Wizard del Career Passport: indicador de pasos */
+.wizard-progress{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px;flex-wrap:wrap}
+.wizard-step-indicator{display:flex;align-items:center;gap:8px;color:var(--muted-2);font-size:.82rem;font-weight:700;padding:0 18px;position:relative}
+.wizard-step-indicator:not(:last-child)::after{content:"";width:36px;height:1px;background:var(--line);margin-left:18px}
+.wizard-step-num{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+.wizard-step-indicator.is-active{color:var(--text)}
+.wizard-step-indicator.is-active .wizard-step-num{background:var(--cyan);border-color:var(--cyan);color:#00212b}
+.wizard-step-indicator.is-done .wizard-step-num{background:var(--amber);border-color:var(--amber);color:#2b1f00}
+
+/* Pasos del formulario: se muestra uno a la vez */
+.wizard-step{display:none}
+.wizard-step.is-active{display:block}
+.wizard-step-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;flex-wrap:wrap}
+
+/* Sección de oportunidades: se destraba al terminar el paso 1 o al navegar directo */
+.section.wizard-gated{opacity:.45;filter:saturate(.5)}
+.section.wizard-gated.wizard-unlocked{opacity:1;filter:none}
 
 .hero-card{
   background:
@@ -273,7 +321,21 @@ img{max-width:100%;display:block}
   border-bottom:1px solid var(--line);padding-bottom:16px;
 }
 .passport-score strong{font-size:2.9rem;color:var(--cyan);font-family:var(--font-display)}
+.passport-missing{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:.85rem}
+.passport-missing b{display:block;margin-bottom:8px;color:var(--muted)}
 .passport-footer{display:flex;justify-content:space-between;gap:15px;color:var(--muted-2);font-size:.75rem;margin-top:40px}
+
+.passport-repeat{margin:6px 0 20px;padding-top:14px;border-top:1px dashed var(--line)}
+.passport-repeat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.passport-repeat-head h4{font-size:.92rem;margin:0;color:var(--muted)}
+.entry-list{display:flex;flex-direction:column;gap:12px}
+.entry-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;background:rgba(3,10,20,.4);
+  border:1px solid var(--line);border-radius:12px;padding:14px;position:relative;
+}
+.entry-row label{margin-bottom:0;font-size:.8rem}
+.entry-row label:has(textarea){grid-column:1 / -1}
+.entry-row .remove-entry-btn{grid-column:1 / -1;justify-self:end;color:var(--amber);font-size:.78rem}
 
 /* ---------------- Búsqueda / Jobs ---------------- */
 .searchbar{display:grid;grid-template-columns:1.3fr 1fr .75fr auto;gap:10px;margin-bottom:16px}
@@ -360,6 +422,16 @@ dialog h2{font-family:var(--font-display);margin-bottom:6px}
   cursor:pointer;width:34px;height:34px;border-radius:10px;line-height:1;
 }
 .dialog-close:hover{background:var(--surface-hover)}
+
+.onboarding-dialog{max-width:520px}
+.onboarding-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.onboarding-option{
+  background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:12px;
+  padding:16px 14px;font:inherit;font-weight:700;text-align:left;cursor:pointer;
+  transition:border-color .18s var(--ease),transform .18s var(--ease);
+}
+.onboarding-option:hover{border-color:var(--cyan);transform:translateY(-2px)}
+@media(max-width:480px){.onboarding-options{grid-template-columns:1fr}}
 
 .cart-count{
   display:inline-block;min-width:18px;padding:0 5px;margin-left:2px;background:var(--cyan);

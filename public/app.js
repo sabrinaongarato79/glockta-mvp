@@ -1,10 +1,116 @@
 let config = {};
 let supabaseClient = null;
 let currentUser = null;
-let profile = { name:'', goal:'', skills:[], languages:[] };
+let profile = { name:'', goal:'', skills:[], languages:[], experience:[], education:[], certifications:[], portfolio:[] };
 
 const $ = id => document.getElementById(id);
 const splitValues = value => value.split(',').map(v=>v.trim()).filter(Boolean);
+
+// ---- Career Passport ampliado: experiencia, educación, certificaciones y portfolio ----
+// Cada sección es una lista de entradas editables a mano (agregar/quitar), sin depender de IA.
+const ENTRY_FIELDS = {
+  experience: [{key:'role',label:'Puesto'},{key:'company',label:'Empresa'},{key:'period',label:'Período'},{key:'achievements',label:'Logros',area:true}],
+  education: [{key:'institution',label:'Institución'},{key:'degree',label:'Título / nivel'},{key:'period',label:'Período'}],
+  certifications: [{key:'name',label:'Nombre'},{key:'issuer',label:'Entidad'},{key:'year',label:'Año'}],
+  portfolio: [{key:'title',label:'Título'},{key:'url',label:'Enlace'},{key:'description',label:'Descripción',area:true}]
+};
+const ENTRY_TABLES = { experience:'experience', education:'education', certifications:'certifications', portfolio:'portfolio_items' };
+
+function ensureProfileShape(){
+  profile.skills = profile.skills || [];
+  profile.languages = profile.languages || [];
+  profile.experience = profile.experience || [];
+  profile.education = profile.education || [];
+  profile.certifications = profile.certifications || [];
+  profile.portfolio = profile.portfolio || [];
+}
+
+function createEntryRow(section, index, data){
+  const fields = ENTRY_FIELDS[section];
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.dataset.index = String(index);
+  row.innerHTML = fields.map(f => {
+    const val = escapeHtml(data[f.key] || '');
+    return f.area
+      ? `<label>${f.label}<textarea data-field="${f.key}" rows="2">${val}</textarea></label>`
+      : `<label>${f.label}<input data-field="${f.key}" type="text" value="${val}" /></label>`;
+  }).join('') + `<button type="button" class="text-btn remove-entry-btn">✕ Quitar</button>`;
+  return row;
+}
+
+function renderEntryList(section){
+  const container = $(`${section}List`);
+  if(!container) return;
+  container.innerHTML = '';
+  (profile[section] || []).forEach((data, i) => container.appendChild(createEntryRow(section, i, data)));
+}
+
+function renderAllEntryLists(){ Object.keys(ENTRY_FIELDS).forEach(renderEntryList); }
+
+function cleanEntries(list){
+  return (list || []).map(entry => {
+    const cleaned = {};
+    Object.keys(entry || {}).forEach(k => { if(entry[k]) cleaned[k] = String(entry[k]).trim(); });
+    return cleaned;
+  }).filter(entry => Object.keys(entry).length > 0);
+}
+
+document.querySelectorAll('.add-entry-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const section = btn.dataset.section;
+    if(!profile[section]) profile[section] = [];
+    profile[section].push({});
+    renderEntryList(section);
+  });
+});
+
+document.querySelectorAll('.entry-list').forEach(list => {
+  const section = list.id.replace('List', '');
+  list.addEventListener('input', e => {
+    const row = e.target.closest('.entry-row');
+    if(!row || !e.target.dataset.field) return;
+    const idx = Number(row.dataset.index);
+    if(!profile[section][idx]) profile[section][idx] = {};
+    profile[section][idx][e.target.dataset.field] = e.target.value;
+  });
+  list.addEventListener('click', e => {
+    if(!e.target.classList.contains('remove-entry-btn')) return;
+    const row = e.target.closest('.entry-row');
+    profile[section].splice(Number(row.dataset.index), 1);
+    renderEntryList(section);
+  });
+});
+
+async function refreshCareerScore(){
+  try{
+    const res = await fetch('/api/career-score', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(profile) });
+    const data = await res.json();
+    $('profileCompletion').textContent = `${data.score}%`;
+    const missingBox = $('passportMissing'), missingChips = $('passportMissingChips');
+    if(data.missingSections && data.missingSections.length){
+      missingChips.innerHTML = data.missingSections.map(s => `<span>${escapeHtml(s)}</span>`).join('');
+      missingBox.classList.remove('hidden');
+    }else{
+      missingBox.classList.add('hidden');
+    }
+  }catch(e){ console.warn('No se pudo calcular el Career Score', e); }
+}
+
+async function saveEntrySection(section, entries){
+  const table = ENTRY_TABLES[section];
+  const fields = ENTRY_FIELDS[section].map(f => f.key);
+  await supabaseClient.from(table).delete().eq('user_id', currentUser.id);
+  const rows = (entries || []).map((entry, i) => {
+    const row = { user_id: currentUser.id, sort_order: i };
+    fields.forEach(f => { row[f] = entry[f] || null; });
+    return row;
+  }).filter(r => fields.some(f => r[f]));
+  if(rows.length){
+    const { error } = await supabaseClient.from(table).insert(rows);
+    if(error) throw error;
+  }
+}
 
 async function loadConfig(){
   try{
@@ -30,20 +136,22 @@ async function loadConfig(){
 function escapeHtml(str){return String(str).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 
 function renderProfile(){
+  ensureProfileShape();
   $('passportName').textContent = profile.name || 'Tu nombre';
   $('passportGoal').textContent = profile.goal || 'Definilo para personalizar tus oportunidades';
   const all=[...profile.skills,...profile.languages];
   $('passportSkills').innerHTML = all.length ? all.map(x=>`<span>${escapeHtml(x)}</span>`).join('') : '<span>Agregá tus habilidades</span>';
-  const fields=[profile.name,profile.goal,profile.skills.length,profile.languages.length].filter(Boolean).length;
-  $('profileCompletion').textContent=`${Math.max(25,fields*25)}%`;
   localStorage.setItem('glockta-profile',JSON.stringify(profile));
+  refreshCareerScore();
 }
 
 function fillProfileForm(){
+  ensureProfileShape();
   $('name').value=profile.name||'';
   $('goal').value=profile.goal||'';
   $('skills').value=(profile.skills||[]).join(', ');
   $('languages').value=(profile.languages||[]).join(', ');
+  renderAllEntryLists();
 }
 
 async function renderAuthState(){
@@ -74,9 +182,21 @@ async function loadRemoteProfile(){
   const { data, error } = await supabaseClient.from('profiles').select('full_name, professional_goal, skills, languages').eq('id',currentUser.id).maybeSingle();
   if(error){console.warn('Profile load error',error.message);return;}
   if(data){
-    profile={name:data.full_name||'',goal:data.professional_goal||'',skills:data.skills||[],languages:data.languages||[]};
-    renderProfile(); fillProfileForm();
+    profile={...profile,name:data.full_name||'',goal:data.professional_goal||'',skills:data.skills||[],languages:data.languages||[]};
   }
+  try{
+    const [exp, edu, cert, port] = await Promise.all([
+      supabaseClient.from('experience').select('role, company, period, achievements').eq('user_id', currentUser.id).order('sort_order'),
+      supabaseClient.from('education').select('institution, degree, period').eq('user_id', currentUser.id).order('sort_order'),
+      supabaseClient.from('certifications').select('name, issuer, year').eq('user_id', currentUser.id).order('sort_order'),
+      supabaseClient.from('portfolio_items').select('title, url, description').eq('user_id', currentUser.id).order('sort_order')
+    ]);
+    profile.experience = exp.data || [];
+    profile.education = edu.data || [];
+    profile.certifications = cert.data || [];
+    profile.portfolio = port.data || [];
+  }catch(e){ console.warn('No se pudo cargar el Career Passport ampliado', e); }
+  renderProfile(); fillProfileForm();
 }
 
 async function saveRemoteProfile(){
@@ -84,17 +204,55 @@ async function saveRemoteProfile(){
   const payload={id:currentUser.id,full_name:profile.name,professional_goal:profile.goal,skills:profile.skills,languages:profile.languages,updated_at:new Date().toISOString()};
   const { error }=await supabaseClient.from('profiles').upsert(payload,{onConflict:'id'});
   if(error) throw error;
+  await Promise.all(Object.keys(ENTRY_TABLES).map(section => saveEntrySection(section, profile[section])));
   return {saved:true};
 }
 
+// ---- Wizard: Career Passport en pasos ----
+function setWizardStep(n){
+  document.querySelectorAll('#profileForm [data-step]').forEach(el=>{
+    el.classList.toggle('is-active', Number(el.dataset.step)===n);
+  });
+  document.querySelectorAll('.wizard-step-indicator').forEach(el=>{
+    const s=Number(el.dataset.stepIndicator);
+    el.classList.toggle('is-active', s===n);
+    el.classList.toggle('is-done', s<n);
+  });
+  document.getElementById('passport').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function unlockJobsSection(){
+  const jobsSection=document.getElementById('jobs');
+  if(jobsSection) jobsSection.classList.add('wizard-unlocked');
+}
+if($('wizardNextBtn')) $('wizardNextBtn').addEventListener('click', ()=> setWizardStep(2));
+if($('wizardBackBtn')) $('wizardBackBtn').addEventListener('click', ()=> setWizardStep(1));
+// Cualquier link que apunte directo a #jobs o #curso-gratis debe destrabar esa sección aunque el wizard no se haya completado
+document.querySelectorAll('a[href="#jobs"], a[href="#curso-gratis"]').forEach(a=>{
+  a.addEventListener('click', unlockJobsSection);
+});
+
 $('profileForm').addEventListener('submit',async e=>{
   e.preventDefault();
-  profile={name:$('name').value.trim(),goal:$('goal').value.trim(),skills:splitValues($('skills').value),languages:splitValues($('languages').value)};
+  profile={
+    ...profile,
+    name:$('name').value.trim(),
+    goal:$('goal').value.trim(),
+    skills:splitValues($('skills').value),
+    languages:splitValues($('languages').value),
+    experience:cleanEntries(profile.experience),
+    education:cleanEntries(profile.education),
+    certifications:cleanEntries(profile.certifications),
+    portfolio:cleanEntries(profile.portfolio)
+  };
   renderProfile();
+  renderAllEntryLists();
   try{
     const result=await saveRemoteProfile();
     toast(result.saved?'Perfil guardado en Supabase.':'Perfil guardado localmente. Iniciá sesión para sincronizarlo.');
   }catch(err){toast(`No se pudo sincronizar el perfil: ${err.message}`);}
+  unlockJobsSection();
+  setWizardStep(3);
+  document.getElementById('jobs').scrollIntoView({behavior:'smooth', block:'start'});
 });
 
 // ---- Asistente de Career Passport con IA ----
@@ -159,7 +317,9 @@ function renderJob(job,match){
   const card=document.createElement('article'); card.className='job-card';
   const score=match.score===null?'—':`${match.score}%`;
   const aiBtn = config.aiEnabled ? `<button class="text-btn ai-advice-btn">✦ Ver consejo personalizado</button>` : '';
-  card.innerHTML=`<span class="eyebrow">${escapeHtml(job.source||'Proveedor externo')}</span><h3>${escapeHtml(job.title)}</h3><div class="job-meta">${escapeHtml(job.company||'')} · ${escapeHtml(job.location||'')}</div><p>${escapeHtml((job.description||'').slice(0,260))}</p><div class="match-box"><span class="match-score ${match.score!==null&&match.score<60?'low':''}">${score} Match</span><p class="status">${escapeHtml(match.explanation)}</p><div class="chips">${(match.matched||[]).slice(0,5).map(x=>`<span>✓ ${escapeHtml(x)}</span>`).join('')}${(match.gaps||[]).slice(0,3).map(x=>`<span class="gap">△ ${escapeHtml(x)}</span>`).join('')}</div>${aiBtn}<div class="ai-advice-box hidden"></div></div><div class="job-actions"><button class="btn btn-primary save-job">Guardar</button>${job.url&&job.url!=='#'?`<a class="btn btn-secondary" target="_blank" rel="noopener" href="${escapeHtml(job.url)}">Ver fuente</a>`:''}<a class="btn btn-secondary" href="#mentoria">Hablar con mentor</a></div>`;
+  const gaps = match.gaps||[];
+  const pathBtn = gaps.length ? `<button class="text-btn learning-path-btn">🎯 Ver ruta para cerrar la brecha</button>` : '';
+  card.innerHTML=`<span class="eyebrow">${escapeHtml(job.source||'Proveedor externo')}</span><h3>${escapeHtml(job.title)}</h3><div class="job-meta">${escapeHtml(job.company||'')} · ${escapeHtml(job.location||'')}</div><p>${escapeHtml((job.description||'').slice(0,260))}</p><div class="match-box"><span class="match-score ${match.score!==null&&match.score<60?'low':''}">${score} Match</span><p class="status">${escapeHtml(match.explanation)}</p><div class="chips">${(match.matched||[]).slice(0,5).map(x=>`<span>✓ ${escapeHtml(x)}</span>`).join('')}${gaps.slice(0,3).map(x=>`<span class="gap">△ ${escapeHtml(x)}</span>`).join('')}</div>${aiBtn}<div class="ai-advice-box hidden"></div>${pathBtn}<div class="learning-path-box hidden"></div></div><div class="job-actions"><button class="btn btn-primary save-job">Guardar</button>${job.url&&job.url!=='#'?`<a class="btn btn-secondary" target="_blank" rel="noopener" href="${escapeHtml(job.url)}">Ver fuente</a>`:''}<a class="btn btn-secondary" href="#mentoria">Hablar con mentor</a></div>`;
   card.querySelector('.save-job').addEventListener('click',()=>saveJob(job,match));
   const adviceBtn = card.querySelector('.ai-advice-btn');
   if(adviceBtn) adviceBtn.addEventListener('click', async ()=>{
@@ -172,6 +332,21 @@ function renderJob(job,match){
       box.textContent = res.ok ? data.explanation : (data.message || 'No se pudo generar el consejo en este momento.');
     }catch(err){box.textContent='No se pudo conectar con el asistente de IA.';}
     finally{adviceBtn.disabled=false;}
+  });
+  const pathBtnEl = card.querySelector('.learning-path-btn');
+  if(pathBtnEl) pathBtnEl.addEventListener('click', async ()=>{
+    const box = card.querySelector('.learning-path-box');
+    box.classList.remove('hidden');
+    pathBtnEl.disabled = true; box.textContent = 'Buscando cómo cerrar la brecha…';
+    try{
+      const res = await fetch('/api/learning-path',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({gaps, catalog: catalogProducts})});
+      const data = await res.json();
+      box.innerHTML = (data.recommendations||[]).map(r => r.type==='internal'
+        ? `<p>△ <b>${escapeHtml(r.skill)}</b> → <a href="#biblioteca">${escapeHtml(r.label)}</a> (ya está en la tienda GLOCKTA)</p>`
+        : `<p>△ <b>${escapeHtml(r.skill)}</b> → <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.label)} ↗</a></p>`
+      ).join('') || '<p class="status">No se encontró una ruta específica todavía.</p>';
+    }catch(err){box.textContent='No se pudo calcular la ruta de aprendizaje.';}
+    finally{pathBtnEl.disabled=false;}
   });
   $('jobsGrid').appendChild(card);
 }
@@ -466,9 +641,12 @@ function renderCart(){
   $('cartTotal').textContent = money(total);
 }
 
+let catalogProducts = [];
+
 async function loadCatalog(){
   try{
     const data = await fetch('/api/products').then(r=>r.json());
+    catalogProducts = [...(data.products||[]), ...(data.trainings||[])];
     renderProducts(data.products||[]);
     renderTrainings(data.trainings||[]);
   }catch(e){
@@ -572,6 +750,43 @@ $('installBtn').addEventListener('click', async () => {
 });
 window.addEventListener('appinstalled', () => { $('installBtn').classList.add('hidden'); toast('GLOCKTA instalada correctamente.'); });
 
+// ---- Onboarding inteligente: 2 preguntas cortas para la primera visita ----
+const ONBOARDING_DONE_KEY = 'glockta-onboarding-done';
+const ONBOARDING_TARGETS = { empleo: '#jobs', capacitacion: '#curso-gratis', perfil: '#passport', empresa: '#business' };
+
+function finishOnboarding(){
+  localStorage.setItem(ONBOARDING_DONE_KEY, '1');
+  try{ $('onboardingDialog').close(); }catch{}
+}
+
+function maybeShowOnboarding(){
+  if(localStorage.getItem(ONBOARDING_DONE_KEY)) return;
+  if(profile.name || profile.goal){ localStorage.setItem(ONBOARDING_DONE_KEY, '1'); return; } // usuaria previa a esta función
+  setTimeout(() => { try{ $('onboardingDialog').showModal(); }catch{} }, 500);
+}
+
+$('onboardingCloseBtn').addEventListener('click', finishOnboarding);
+
+document.querySelectorAll('#onboardingStep1 .onboarding-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $('onboardingDialog').dataset.target = ONBOARDING_TARGETS[btn.dataset.goal] || '';
+    $('onboardingStep1').classList.add('hidden');
+    $('onboardingStep2').classList.remove('hidden');
+  });
+});
+
+document.querySelectorAll('#onboardingStep2 .onboarding-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const choice = btn.dataset.a11y;
+    if(choice === 'contrast'){ document.body.classList.add('high-contrast'); $('contrastBtn').setAttribute('aria-pressed','true'); }
+    if(choice === 'text'){ document.body.classList.add('large-text'); }
+    const target = $('onboardingDialog').dataset.target;
+    finishOnboarding();
+    if(target === '#jobs' || target === '#curso-gratis') unlockJobsSection();
+    if(target) document.querySelector(target)?.scrollIntoView({ behavior:'smooth' });
+  });
+});
+
 (async()=>{
   await loadConfig();
   const saved=localStorage.getItem('glockta-profile');
@@ -585,4 +800,5 @@ window.addEventListener('appinstalled', () => { $('installBtn').classList.add('h
   updateCourseProgressBar();
   await searchJobs();
   await loadCatalog();
+  maybeShowOnboarding();
 })();
