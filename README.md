@@ -3,7 +3,8 @@
 MVP de tesis para Escuela Da Vinci. Objetivo: demostrar un recorrido de empleabilidad de punta a punta con UX accesible, API externa, matching explicable, persistencia, cobro real y arquitectura extensible — listo para exponer y para salir al mercado.
 
 ## Flujo de demo
-1. Crear/editar Career Passport.
+0. Primera visita: onboarding de 2 preguntas (qué te trae por GLOCKTA + accesibilidad) que lleva directo a la sección más relevante.
+1. Crear/editar Career Passport (objetivo, habilidades, idiomas, experiencia, educación, certificaciones y portfolio) y ver el Career Score actualizarse en vivo.
 2. Buscar oportunidades mediante `JobProvider`.
 3. Normalizar resultados de Jooble/Adzuna o usar proveedor demo.
 4. Calcular Glockta Match y mostrar brechas.
@@ -40,7 +41,7 @@ Sin completar ningún `.env`, el sitio ya funciona 100% en **modo demo**: catál
 1. Creá un proyecto gratis en [supabase.com](https://supabase.com).
 2. En **Project Settings → API** copiá `Project URL`, `anon public key` y `service_role key`.
 3. Pegalos en tu `.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
-4. En el editor SQL de Supabase, corré todo el contenido de `sql/schema.sql`. Esto crea: `profiles`, `saved_jobs`, `appointments`, `business_leads`, `products`, `orders`, `order_items`, `training_signups`, `course_progress` y `certificates`, con Row Level Security activado donde corresponde.
+4. En el editor SQL de Supabase, corré todo el contenido de `sql/schema.sql`. Esto crea: `profiles`, `saved_jobs`, `appointments`, `business_leads`, `products`, `orders`, `order_items`, `training_signups`, `course_progress`, `certificates`, `experience`, `education`, `certifications` y `portfolio_items`, con Row Level Security activado donde corresponde.
 5. En **Authentication → Providers**, activá Google y completá el Client ID/Secret de un OAuth Client de Google Cloud (tipo "Web application", con `https://TU-PROYECTO.supabase.co/auth/v1/callback` como redirect URI).
 
 Con esto: el login con Google, el Career Passport, las oportunidades guardadas, el progreso del curso y los certificados quedan guardados de verdad por usuario (antes vivían solo en `localStorage` del navegador).
@@ -124,6 +125,34 @@ Para obtener el **.apk real** que pide el punto 3/12 de los entregables (sin esc
 
 Esto resuelve el requisito sin duplicar código: la APK y el Website comparten el mismo backend, base de datos y lógica.
 
+## Wizard: la home ya no es una sola página larga
+La landing arrancaba mostrando las 7 secciones a la vez, lo que hacía que la persona se perdiera. Ahora `#inicio` es una pantalla liviana con un solo mensaje y un botón ("Empezar →"), y el núcleo del producto (Career Passport → Oportunidades) se recorre como un asistente de 3 pasos con un indicador visual ("Paso X de 3") arriba del formulario:
+
+1. **Tu perfil** — nombre, objetivo, habilidades e idiomas (con el asistente de IA opcional).
+2. **Experiencia** — experiencia laboral, educación, certificaciones y portfolio (opcional, explícitamente marcado como tal, para no frenar a quien tiene apuro).
+3. **Oportunidades** — al guardar el perfil se destraba automáticamente la sección de búsqueda (`#jobs`, antes visible siempre) y la página hace scroll directo ahí.
+
+La sección de Oportunidades sigue existiendo en el HTML y sigue siendo alcanzable en cualquier momento desde el menú "Oportunidades" o desde "¿Ya tenés tu perfil? Ir directo a Oportunidades" en el hero — en ese caso se destraba igual, sin obligar a pasar por el formulario. Es un cambio 100% de interfaz (`public/index.html`, `public/app.js`, `public/styles.css`): no se tocó ningún endpoint ni la lógica de guardado, por eso los 31 tests automatizados siguen pasando sin cambios.
+
+## Jerarquía visual: núcleo vs. complementos
+La landing ya no trata las 7 secciones como pestañas del mismo peso. El núcleo (Career Passport → Oportunidades → Curso gratuito, que cierra la primera brecha) queda numerado 01/02/03 y resaltado en la navegación (`.nav-core`, en blanco y negrita). Después hay un separador visual explícito ("Con tu Career Passport en marcha, esto te puede servir") y recién ahí aparecen Mentoría, Capacitaciones, Tienda y Empresas, marcadas con la etiqueta "Complemento ·" en un tono más apagado. Es un cambio de jerarquía visual y de orden en el HTML — ninguna sección se eliminó ni perdió funcionalidad.
+
+## Catálogo profesional
+El catálogo de Glockta Store y Capacitaciones tiene 24 ítems (18 pagos, 6 gratuitos) diseñados a propósito para cubrir cada palabra clave del diccionario de habilidades del Glockta Match (excel, sql, power bi, html/css/javascript, canva, inglés, portugués, español, crm, google analytics, ventas, atención al cliente, comunicación, organización, administración, facturación, redes sociales, marketing, scrum, liderazgo, primeros auxilios, cuidado de adultos mayores, contenidos web). Esto no es solo contenido de venta: es lo que hace que el Learning Path (sección siguiente) pueda recomendar un curso propio real en vez de derivar siempre a una búsqueda externa. El seed vive en `sql/schema.sql` (para Supabase) y en `DEMO_PRODUCTS`/`DEMO_TRAININGS` de `src/server.js` (modo demo) — mantenelos sincronizados si agregás o cambiás productos.
+
+## Learning Path: cerrar la brecha, no solo mostrarla
+Cada oportunidad con brechas detectadas por el Glockta Match muestra un botón "Ver ruta para cerrar la brecha". `POST /api/learning-path` conecta cada habilidad faltante con: un producto/capacitación del catálogo de GLOCKTA si su nombre o descripción menciona esa habilidad (recomendación interna), o si no hay ninguno, un enlace de búsqueda externo (mismo patrón ya usado en "Buscar más cursos en Coursera" del curso gratuito). Es un cálculo por palabra clave, explicable y sin IA — nunca inventa un curso que no existe en el catálogo real (cubierto por tests). Es la respuesta concreta al hallazgo de la auditoría de que "el curso está desconectado del match": ahora cada brecha tiene un próximo paso accionable.
+
+## Onboarding inteligente
+En la primera visita (detectado por `localStorage`, no se repite después) aparece un diálogo de 2 preguntas cortas: qué te trae por GLOCKTA (buscar empleo, capacitarte, mejorar el perfil o "soy una empresa") y si necesitás alto contraste o texto más grande. Según la respuesta, la página hace scroll directo a la sección más relevante en vez de mostrar todo el sitio de una vez. Una usuaria que ya tenía perfil guardado antes de esta función no ve el onboarding (se asume ya orientada).
+
+## Career Passport ampliado (Career Score)
+El Career Passport ya no es solo objetivo/habilidades/idiomas: suma secciones editables de **experiencia laboral**, **educación**, **certificaciones** y **portfolio/evidencia**, cada una con entradas que se agregan y quitan libremente desde el formulario.
+
+- **Career Score**: `POST /api/career-score` calcula, de forma explicable y sin IA, qué porcentaje del pasaporte está completo (7 secciones en partes iguales) y devuelve exactamente qué falta (`missingSections`). Se muestra en vivo en la tarjeta del pasaporte apenas se guarda el perfil.
+- **Persistencia**: logueado con Google, cada sección se guarda en su propia tabla de Supabase (`experience`, `education`, `certifications`, `portfolio_items`) con el patrón "reemplazar todo" (se borran las filas anteriores del usuario y se insertan las actuales) — simple y suficiente para un MVP donde estas listas son cortas. Sin sesión, se guarda igual que el resto del perfil en `localStorage`.
+- **Por qué importa para la tesis**: es la respuesta concreta a "el Career Passport es solo un formulario corto" — ahora tiene el mismo tipo de estructura que un CV real, pero con feedback inmediato (el Career Score sube al completar cada sección) en vez de ser un formulario que se llena una vez y se olvida.
+
 ## Glockta Store
 - **Catálogo dinámico**: `GET /api/products` lee de la tabla `products` (o modo demo sin Supabase). Separa automáticamente pagos (`price > 0`) de capacitaciones gratuitas (`price = 0`).
 - **Carrito real**: persiste en `localStorage`, con panel lateral, totales y checkout.
@@ -152,10 +181,10 @@ El proyecto incluye una suite de pruebas con el test runner nativo de Node (no r
 npm test
 ```
 
-Cubre tres niveles:
-- **Unitarias de lógica de negocio** (`tests/matchingService.test.js`): verifica que el cálculo de compatibilidad sea correcto, no distinga mayúsculas/minúsculas, use `job.skills` cuando existen y nunca "decida" automáticamente — sólo informe coincidencias y brechas.
+Cubre tres niveles (31 pruebas en total):
+- **Unitarias de lógica de negocio** (`tests/matchingService.test.js`, `tests/careerScoreService.test.js`, `tests/learningPathService.test.js`): verifican que el cálculo de compatibilidad, el Career Score y la ruta de aprendizaje sean correctos, no distingan mayúsculas/minúsculas, usen `job.skills` cuando existen y nunca "decidan" automáticamente ni inventen un curso inexistente — sólo informan coincidencias, brechas, completitud y próximos pasos reales.
 - **Unitarias de integraciones externas** (`tests/aiService.test.js`, `tests/paymentService.test.js`): confirman que, sin credenciales configuradas, el sistema entra en modo demo de forma segura (devuelve `null`/`false`) en vez de romperse.
-- **De integración de API** (`tests/api.test.js`): levantan el servidor Express real en un puerto de prueba y validan los endpoints más sensibles — que `/api/config` nunca filtre claves secretas, que los endpoints de IA respondan `503` claro sin `ANTHROPIC_API_KEY`, que el checkout rechace pedidos sin email, y que `/api/admin/overview` exija el token correcto cuando `ADMIN_TOKEN` está configurado.
+- **De integración de API** (`tests/api.test.js`): levantan el servidor Express real en un puerto de prueba y validan los endpoints más sensibles — que `/api/config` nunca filtre claves secretas, que los endpoints de IA respondan `503` claro sin `ANTHROPIC_API_KEY`, que el checkout rechace pedidos sin email, que `/api/career-score` calcule bien la completitud, y que `/api/admin/overview` exija el token correcto cuando `ADMIN_TOKEN` está configurado.
 
 Para la defensa: esta suite no busca cobertura exhaustiva (fuera del alcance de un MVP de tesis), sino demostrar una práctica real de calidad sobre las partes más riesgosas del sistema — dinero, datos sensibles y decisiones automáticas.
 
